@@ -7,5 +7,5 @@ end
 eval_gemfile File.join( oacis, "Gemfile")
 
 gem "rbczmq"
-gem "iruby"
+gem "iruby", "~> 0.2.9"
 
