@@ -18,19 +18,11 @@ class Simulator
   end
 
   def to_html
-    to_row = lambda {|key| "<tr><th>#{key}</th><td>#{self.send(key)}</td></tr>" }
-    "<table>" + [:id,:name,:command,:description].map(&to_row).join + "</table>"
-  end
-
-  def to_link
-    obj = Object.new
-    sim_id = id.to_s
-    obj.define_singleton_method(:to_html) do
-      <<-EOS
-      <a href=http://localhost:3000/simulators/#{sim_id} target="_blank" >link</a>
-      EOS
+    tags = [:id,:name,:command,:description].map do |key|
+      "<tr><th>#{key}</th><td>#{self.send(key)}</td></tr>"
     end
-    obj
+    link = "<a href=http://localhost:3000/simulators/#{id} target=\"_blank\" >link</a>"
+    "<table>" + tags.join + "</table>" + link
   end
 end
 
