@@ -11,4 +11,5 @@ gem "iruby", "~> 0.2.9"
 gem "daru"
 gem "nyaplot", github: 'domitry/nyaplot', ref: 'master'
 # pointing the master branch to avoid an issue. See https://github.com/domitry/nyaplot/issues/52
+gem "gnuplotrb"
 
