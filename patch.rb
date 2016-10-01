@@ -1,3 +1,15 @@
+module JupyterHelper
+
+  def self.make_html_for_model( obj, keys_in_table, path )
+    header = "<h2>#{obj.class}</h2>"
+    tags = keys_in_table.map do |key|
+      "<tr><th>#{key}</th><td>#{obj.send(key)}</td></tr>"
+    end
+    link = "<a href=http://localhost:3000#{path} target=\"_blank\" >link</a>"
+    header + "<table>" + tags.join + "</table>" + link
+  end
+end
+
 Simulator  # must eval `Simulator` to ensure Simulator class is loaded
 class Simulator
 
@@ -19,11 +31,9 @@ class Simulator
   end
 
   def to_html
-    tags = [:id,:name,:command,:description].map do |key|
-      "<tr><th>#{key}</th><td>#{self.send(key)}</td></tr>"
-    end
-    link = "<a href=http://localhost:3000/simulators/#{id} target=\"_blank\" >link</a>"
-    "<table>" + tags.join + "</table>" + link
+    keys = [:id,:name,:command,:description]
+    path = Rails.application.routes.url_helpers.simulator_path(self)
+    JupyterHelper.make_html_for_model( self, keys, path)
   end
 end
 
@@ -42,6 +52,30 @@ class ParameterSet
     else
       return avg
     end
+  end
+
+  def parameters
+    v
+  end
+
+  def to_html
+    keys = [:id,:parameters]
+    path = Rails.application.routes.url_helpers.parameter_set_path(self)
+    JupyterHelper.make_html_for_model( self, keys, path)
+  end
+end
+
+Run
+class Run
+
+  def submitted_hostname
+    submitted_to.try(:name)
+  end
+
+  def to_html
+    keys = [:id,:status,:submitted_hostname,:result]
+    path = Rails.application.routes.url_helpers.parameter_set_path(self)
+    JupyterHelper.make_html_for_model( self, keys, path)
   end
 end
 
