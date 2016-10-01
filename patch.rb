@@ -16,6 +16,22 @@ class Simulator
 
     Daru::DataFrame.rows( rows, order: keys, index: ids )
   end
+
+  def to_html
+    to_row = lambda {|key| "<tr><th>#{key}</th><td>#{self.send(key)}</td></tr>" }
+    "<table>" + [:id,:name,:command,:description].map(&to_row).join + "</table>"
+  end
+
+  def to_link
+    obj = Object.new
+    sim_id = id.to_s
+    obj.define_singleton_method(:to_html) do
+      <<-EOS
+      <a href=http://localhost:3000/simulators/#{sim_id} target="_blank" >link</a>
+      EOS
+    end
+    obj
+  end
 end
 
 ParameterSet
