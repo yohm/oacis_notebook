@@ -1,18 +1,19 @@
 Simulator  # must eval `Simulator` to ensure Simulator class is loaded
 class Simulator
 
+  # with_results: keys of results. can be either nil, string, or array of strings.
   def parameter_sets_in_dataframe(where: nil, with_results: nil)
     pss = parameter_sets.asc(:id)
     pss = pss.where(where) if where
     param_keys = parameter_definitions.map(&:key)
     rows = pss.map do |ps|
       mapped = param_keys.map {|key| ps.v[key] }
-      mapped += with_results.map {|r| ps.average_result(r) } if with_results
+      mapped += Array(with_results).map {|r| ps.average_result(r) }
       mapped
     end
     ids = pss.map(&:id)
 
-    keys = param_keys + with_results.to_a
+    keys = param_keys + Array(with_results)
 
     Daru::DataFrame.rows( rows, order: keys, index: ids )
   end
