@@ -1,3 +1,4 @@
+Simulator  # must eval `Simulator` to ensure Simulator class is loaded
 class Simulator
 
   def parameter_sets_in_dataframe(where: nil)
