@@ -1,17 +1,16 @@
 module JupyterHelper
 
-  def self.make_html_for_model( obj, keys_in_table, path )
+  def self.make_html_for_model( obj, table_contents, path )
     header = "<h2>#{obj.class}</h2>"
-    tags = keys_in_table.map do |key|
-      "<tr><th>#{key}</th><td>#{obj.send(key)}</td></tr>"
+    tags = table_contents.map do |key,val|
+      "<tr><th>#{key}</th><td>#{val}</td></tr>"
     end
     link = "<a href=http://localhost:3000#{path} target=\"_blank\" >link</a>"
     header + "<table>" + tags.join + "</table>" + link
   end
 end
 
-Simulator  # must eval `Simulator` to ensure Simulator class is loaded
-class Simulator
+Simulator.class_eval do
 
   # with_results: keys of results. can be either nil, string, or array of strings.
   def parameter_sets_in_dataframe(where: nil, with_results: nil)
@@ -32,13 +31,13 @@ class Simulator
 
   def to_html
     keys = [:id,:name,:command,:description]
+    table = keys.map {|key| [ key, self.send(key) ] }
     path = Rails.application.routes.url_helpers.simulator_path(self)
-    JupyterHelper.make_html_for_model( self, keys, path)
+    JupyterHelper.make_html_for_model( self, table, path)
   end
 end
 
-ParameterSet
-class ParameterSet
+ParameterSet.class_eval do
 
   def average_result(key, error: false)
     results = runs.where(status: :finished).only(:result).map {|r| r.result[key] }.compact
@@ -60,22 +59,45 @@ class ParameterSet
 
   def to_html
     keys = [:id,:parameters]
+    table = keys.map {|key| [ key, self.send(key) ] }
     path = Rails.application.routes.url_helpers.parameter_set_path(self)
-    JupyterHelper.make_html_for_model( self, keys, path)
+    JupyterHelper.make_html_for_model( self, table, path)
   end
 end
 
-Run
-class Run
-
-  def submitted_hostname
-    submitted_to.try(:name)
-  end
+Run.class_eval do
 
   def to_html
-    keys = [:id,:status,:submitted_hostname,:result]
-    path = Rails.application.routes.url_helpers.parameter_set_path(self)
-    JupyterHelper.make_html_for_model( self, keys, path)
+    keys = [:id, :status, :submitted_to, :result]
+    table = keys.map {|key| [ key, self.send(key) ] }
+    table[2] = ["submitted host", submitted_to.try(:name)]
+
+    path = Rails.application.routes.url_helpers.run_path(self)
+    JupyterHelper.make_html_for_model( self, table, path)
   end
 end
 
+Analyzer.class_eval do
+
+  def to_html
+    keys = [:id,:simulator,:name,:command,:description]
+    table = keys.map {|key| [ key, self.send(key) ] }
+    table[1][1] = simulator.name
+
+    path = Rails.application.routes.url_helpers.analyzer_path(self)
+    JupyterHelper.make_html_for_model( self, table, path)
+  end
+end
+
+Analysis.class_eval do
+
+  def to_html
+    keys = [:id, :analyzer,:status, :submitted_to,:result]
+    table = keys.map {|key| [ key, self.send(key) ] }
+    table[1] = ["analyzer", analyzer.name ]
+    table[3] = ["submitted host", submitted_to.try(:name) ]
+
+    path = Rails.application.routes.url_helpers.analysis_path(self)
+    JupyterHelper.make_html_for_model( self, table, path)
+  end
+end
